@@ -1,33 +1,28 @@
 const express = require("express");
+const {adminAuth,userAuth} = require("./middleware/auth");
 const app = express();
 
-// app.use("/test", (req, res) => {
-//   res.send("test test");
-// });
+app.get("/user",(req,res)=>{
+  res.send("user data retrived...")
+});
 
-app.use(
-  "/user",
+// applying admin auth for admin related routes
+app.use("/admin",adminAuth );
 
-  [(req, res, next) => {
-    next();
-    //res.send("hiiiiii");
-  },
-  (req, res, next) => {
-    next();
-    //res.send("2nd response");
-  }],
-  (req, res) => {
-    res.send("3rd Response");
-  })
+app.get("/admin/GetAllData",(req,res)=>{
+  res.send("Get all the data");
+});
 
-// app.get("/abcd/:userId/:userName", (req,res)=>{
-//   console.log(req.params);
-//   res.send("Good Morningggg "+req.params.userName +"!!");
-// })
-// app.use("/", (req, res) => {
-//     res.send("Namste !!!!");
-//   });
+app.delete("/admin/DeleteData",(req,res)=>{
+  res.send("Admin deleted data sucessfully...");
+});
 
+app.get("/user/getDetails",(req,res)=>{
+  res.send("User dtls retrived sucessfully....");
+});
+app.delete("/user/deleteUser",userAuth,(req,res)=>{
+  res.send("Deleted User data sucessfully");
+});
 app.listen(7777, () => {
   console.log("server is listening on port number 7777");
 });
