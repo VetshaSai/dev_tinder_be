@@ -59,19 +59,36 @@ app.delete("/user", async (req, res) => {
     res.status(400).send("error while deleting");
   }
 });
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
+    //console.log(userId);
+  const data = req.body;
+    //console.log(data);
   try {
-    const userId = req.body.userId;
-    console.log(userId);
-    const data = req.body;
-    console.log(data);
+    //Implementing API level validation...
+   const allowedUpdate = [
+    "userId",
+    "gender",
+    "skills",
+    "age",
+    "aboutUs",
+    "photoUrl"
+  ];
+    isAllowedUpdate = Object.keys(data).every((k)=> allowedUpdate.includes(k));
+    if(!isAllowedUpdate){
+      throw new Error("Update not allowed");
+    }
+    if(data?.skills && data?.skills.length>10){
+      throw new Error("Skills not allowed more than 10");
+    }
     await User.findByIdAndUpdate({ _id: userId }, data, {
       returnDocument: true,
       runValidators: true,
     });
     res.send("User data got updated");
-  } catch (err) {
-    res.status(400).send("while updating something went wrong" + err.message);
+  }
+  catch (err) {
+    res.status(400).send("while updating something went wrong: " + err.message);
   }
 });
 app.delete("/userDelete", async (req, res) => {
