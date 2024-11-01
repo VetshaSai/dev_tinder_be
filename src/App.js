@@ -1,28 +1,108 @@
 const express = require("express");
-const {adminAuth,userAuth} = require("./middleware/auth");
+const { adminAuth, userAuth } = require("./middleware/auth");
+const { connectDb } = require("./config/database");
+const User = require("./models/user");
+//const user = require("./models/user");
 const app = express();
+require("./config/database");
 
-app.get("/user",(req,res)=>{
-  res.send("user data retrived...")
+connectDb()
+  .then(() => {
+    console.log("Database estabilished sucessfully...");
+    app.listen(7777, () => {
+      console.log("server is listening on port number 7777");
+    });
+  })
+  .catch((err) => {
+    console.error("Database connection not estabilished sucessfully...");
+  });
+
+//this middleware creted to convert json to JS object(it will pplicable for all routes)
+app.use(express.json());
+
+app.post("/signUp", async (req, res) => {
+  //creating new instence of the User model
+  const user = new User(req.body);
+  try {
+    await user.save();
+    res.send("User added sucessfully...");
+  } catch (err) {
+    //console.log("error",err);
+    res
+      .status(404)
+      .send(
+        "something went wronmg while creating data in user schema" + err.message
+      );
+  }
 });
 
-// applying admin auth for admin related routes
-app.use("/admin",adminAuth );
-
-app.get("/admin/GetAllData",(req,res)=>{
-  res.send("Get all the data");
+app.get("/user", async (req, res) => {
+  try {
+    const userBody = req.body.emailId;
+    const users = await User.find({ emailId: userBody });
+    if (users.length === 0) {
+      res.status(404).send("users not found!!!");
+    } else {
+      res.send(users);
+    }
+  } catch (err) {
+    res.status(404).send("user data not retrived... something went wrong!!");
+  }
 });
 
-app.delete("/admin/DeleteData",(req,res)=>{
-  res.send("Admin deleted data sucessfully...");
+app.delete("/user", async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    await User.findByIdAndDelete({ _id: userId });
+    res.send("User data deleted");
+  } catch (err) {
+    res.status(400).send("error while deleting");
+  }
+});
+app.patch("/user", async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    console.log(userId);
+    const data = req.body;
+    console.log(data);
+    await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: true,
+      runValidators: true,
+    });
+    res.send("User data got updated");
+  } catch (err) {
+    res.status(400).send("while updating something went wrong" + err.message);
+  }
+});
+app.delete("/userDelete", async (req, res) => {
+  try {
+    const userDelete = req.body.emailId;
+    await User.deleteOne({ emailId: userDelete });
+    res.send("deleted sucessfully!!!");
+  } catch (err) {
+    res.status(404).send("user data not deleted... something went wrong!!");
+  }
 });
 
-app.get("/user/getDetails",(req,res)=>{
-  res.send("User dtls retrived sucessfully....");
+app.patch("/updateUserDetails", async (req, res) => {
+  try {
+    const userUpdate = req.body.emailId;
+    await User.updateOne(
+      { emailId: userUpdate },
+      { $set: { lastName: "Hitman" } },
+      { runValidators: true }
+    );
+    res.send("user dtls got updated");
+  } catch (err) {
+    res.status(404).send("user data not updated..!");
+  }
 });
-app.delete("/user/deleteUser",userAuth,(req,res)=>{
-  res.send("Deleted User data sucessfully");
-});
-app.listen(7777, () => {
-  console.log("server is listening on port number 7777");
+
+app.get("/getAllUsers", async (req, res) => {
+  try {
+    const userData = await User.find({});
+    res.send(userData);
+  } catch (err) {
+    res.status(404).send("user data not retrived");
+  }
 });
