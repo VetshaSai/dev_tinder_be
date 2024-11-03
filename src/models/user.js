@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema(
     firstName: {
       type: String,
       required: true,
-      uppercase: true,
       minLength: 3,
       maxLength: 15,
     },
@@ -75,7 +74,7 @@ const userSchema = new mongoose.Schema(
 );
 
 //always prefer nrml function not arrow functions for schema methods because this obj will work differently for arrow methods
- 
+
 userSchema.methods.validatePassword = async function(passwordInputByUser){
 
   user = this;
