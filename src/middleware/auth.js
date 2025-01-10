@@ -9,7 +9,7 @@ const userAuth =
       const { token } = req.cookies;
 
       if (!token) {
-        throw new Error("Token not valid");
+        return res.status(401).send("please login!");
       }
       // decode from the token
       const decodeMessage = jwt.verify(token, "D$vTinder007");
