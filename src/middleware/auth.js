@@ -12,7 +12,7 @@ const userAuth =
         return res.status(401).send("please login!");
       }
       // decode from the token
-      const decodeMessage = jwt.verify(token, "D$vTinder007");
+      const decodeMessage = jwt.verify(token, process.env.JWT_SECRET);
       const { _id } = decodeMessage;
       // find the user in db
       const user = await User.findById(_id);

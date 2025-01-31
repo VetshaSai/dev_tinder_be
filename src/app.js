@@ -5,6 +5,7 @@ const app = express();
 require("./config/database");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+require("dotenv").config();
 
 
 //this middleware creted to convert json to JS object(it will pplicable for all routes)
@@ -30,8 +31,8 @@ app.use("/",userRouter);
 connectDb()
   .then(() => {
     console.log("Database estabilished sucessfully...");
-    app.listen(7777, () => {
-      console.log("server is listening on port number 7777");
+    app.listen(process.env.PORT, () => {
+      console.log("server is listening on port number secret");
     });
   })
   .catch((err) => {
